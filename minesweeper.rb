@@ -47,7 +47,13 @@ class Board
     end   
     bomb_tiles.all? { |tile| tile.flagged } && safe_tiles.all? { |tile| tile.revealed }
   end
-    
+  
+  def not_valid?(pos)
+    pos[0] > 8 ||
+    pos[0] < 0 ||
+    pos[1] > 8 ||
+    pos[1] < 0
+  end
 end
 
 class Tile
@@ -88,18 +94,18 @@ class Tile
     i = self.pos[0]
     j = self.pos[1]
     neighbor_pos = []
-    moves.each do |move| # Consider refactoring into helper method
-      unless i + move[0] > 8 ||
-        i + move[0] < 0 ||
-        j + move[1] > 8 ||
-        j + move[1] < 0
-        
-        neighbor_pos << @board[[i + move[0], j + move[1]]]
+    
+   moves.each do |move| # Consider refactoring into helper method
+      check_pos = [i + move[0], j + move[1]]
+      unless @board.not_valid?(check_pos)
+        neighbor_pos << @board[check_pos]
       end
     end
     neighbor_pos
   end
   
+ 
+    
   def neighbor_bomb_count
     bomb_count = 0
     neighbors.each do |n_pos|
@@ -170,7 +176,10 @@ class Game
   end
   
   def handle_user_input(input, pos)
-        
+      if @board.not_valid?(pos)  
+        puts "Invalid position, try again" 
+        return get_user_input
+      end
       self.board[pos].reveal if input == "r"
       self.board[pos].flag if input == "f"
       save_game if input == "s"
