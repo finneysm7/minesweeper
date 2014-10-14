@@ -4,15 +4,15 @@ class Board
   attr_reader :grid
   
   def initialize
-    @grid = Array.new(9) { |i| Array.new(9) { |j| Tile.new(i, j, self) }}
+    @grid = Array.new(4) { |i| Array.new(4) { |j| Tile.new(i, j, self) }}
     randomize_bombs
   end
   
   def randomize_bombs
     bomb_pos = []
     
-    until bomb_pos.size == 10
-      rand_pos = [rand(0...9), rand(0...9)]
+    until bomb_pos.size == 1
+      rand_pos = [rand(0...4), rand(0...4)]
       bomb_pos << rand_pos unless bomb_pos.include?(rand_pos)
     end
     
@@ -49,9 +49,9 @@ class Board
   end
   
   def not_valid?(pos)
-    pos[0] > 8 ||
+    pos[0] > 3 ||
     pos[0] < 0 ||
-    pos[1] > 8 ||
+    pos[1] > 3 ||
     pos[1] < 0
   end
 end
@@ -129,9 +129,10 @@ class Tile
 end
 
 class Game
-  attr_accessor :board
+  attr_accessor :board, :time, :break_loop
   def initialize
     @board = Board.new()
+    @time = 0
   end
   
   def display # put in Board class
@@ -165,10 +166,16 @@ class Game
       g = Game.new
     end
     g.play
+    g
+    #g.display_leaderboards
+  end
+  
+  def display_leaderboards
+    
   end
   
   def get_user_input
-    puts "Enter a coordinate position to reveal or flag like so: horizontal, vertical"
+    puts "Enter a coordinate position to reveal or flag like so: vertical, horizontal"
     pos = gets.chomp.split(',').map {|i| i.to_i}
     puts "Do you want to reveal or flag this position or save your game? [r or f or s]"
     input = gets.chomp
@@ -206,5 +213,16 @@ class Game
 end
 
 if __FILE__ == $PROGRAM_NAME
+  time = Time.now
   g = Game.menu
+  time = Time.now - time 
+  if g.board.won?
+    puts "YOU WON in #{time} seconds"
+  # elsif g.break_loop == true
+#     if g.time == 0
+#       g.time = time
+#     else
+#       g.time += time
+#     end
+  end
 end
